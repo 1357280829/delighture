@@ -1,5 +1,3 @@
-[![冰菓](https://cdn.learnku.com/uploads/images/202003/18/33459/0w8NdTvSwl.jpeg!large "冰菓")](https://cdn.learnku.com/uploads/images/202003/18/33459/0w8NdTvSwl.jpeg!large "冰菓")
-
 # 前言
 
 &emsp;&emsp;&emsp;&emsp;这篇文章旨在记录 API 脚手架的搭建过程，搭建这个脚手架是为了整合自己在社区学到的内容 ，同时也是为了以后在新项目面前能迅速拿出实用的干货。
