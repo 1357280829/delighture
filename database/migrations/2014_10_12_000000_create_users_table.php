@@ -16,8 +16,6 @@ class CreateUsersTable extends Migration
             $table->string('phone')->nullable()->comment('手机号');
             $table->string('email')->nullable()->comment('邮箱');
             $table->timestamps();
-
-            //  软删除
             $table->softDeletes();
         });
     }

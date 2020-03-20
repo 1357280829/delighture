@@ -2,7 +2,10 @@
 
 namespace App\Exceptions;
 
+use App\Enums\Code;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -51,5 +54,44 @@ class Handler extends ExceptionHandler
     public function render($request, Throwable $exception)
     {
         return parent::render($request, $exception);
+    }
+
+    /**
+     * 重写：验证异常时抛出JSON响应
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param ValidationException $exception
+     * @return \Illuminate\Http\JsonResponse
+     */
+    protected function invalidJson($request, ValidationException $exception)
+    {
+        return response()->json([
+            'message' => Code::getDescription(Code::FailedValidate),
+            'custom_code' => Code::FailedValidate,
+            'errors' => $exception->errors(),
+        ], $exception->status);
+    }
+
+    /**
+     * 重写：通用异常时抛出JSON响应格式
+     *
+     * @param Throwable $e
+     * @return array
+     */
+    protected function convertExceptionToArray(Throwable $e)
+    {
+        return config('app.debug') ? [
+            'message' => $e->getMessage(),
+            'custom_code' => $e->getCode(),
+            'exception' => get_class($e),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => collect($e->getTrace())->map(function ($trace) {
+                return Arr::except($trace, ['args']);
+            })->all(),
+        ] : [
+            'message' => $this->isHttpException($e) ? $e->getMessage() : 'Server Error',
+            'custom_code' => $e->getCode(),
+        ];
     }
 }

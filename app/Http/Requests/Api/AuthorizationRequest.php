@@ -12,7 +12,7 @@ class AuthorizationRequest extends Request
             case 'POST':
                 return [
                     'account' => 'required|between:6,12|exists:users,account',
-                    'password' => 'required|confirmed',
+                    'password' => 'required',
                 ];
         }
     }

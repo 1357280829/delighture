@@ -16,10 +16,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::namespace('Api')->group(function () {
 
+    Route::post('users', 'UsersController@store');
+
     Route::post('authorizations', 'AuthorizationsController@store');
-    Route::delete('authorizations', 'AuthorizationsController@destroy');
 
     Route::middleware('token.refresh')->group(function () {
-        //  这里加入需要授权认证的接口
+        Route::delete('authorizations', 'AuthorizationsController@destroy');
     });
 });
