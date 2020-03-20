@@ -16,11 +16,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::namespace('Api')->group(function () {
 
-    Route::post('users', 'UsersController@store');
-
     Route::post('authorizations', 'AuthorizationsController@store');
 
     Route::middleware('token.refresh')->group(function () {
         Route::delete('authorizations', 'AuthorizationsController@destroy');
+
+        Route::post('users', 'UsersController@store');
+        Route::get('users', 'UsersController@index');
     });
 });

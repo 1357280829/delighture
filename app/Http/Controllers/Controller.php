@@ -15,7 +15,7 @@ class Controller extends BaseController
     protected function res($code = Code::Success, $data = [], $message = '')
     {
         return response()->json([
-            'message' => $message ?: (Code::getDescription($code) ?? '未知错误'),
+            'message' => $message ?: Code::getDescription($code),
             'custom_code' => $code,
             'data' => $data,
         ]);
