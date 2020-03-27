@@ -6,6 +6,7 @@ use App\Enums\Code;
 use App\Exceptions\CustomException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\AuthorizationRequest;
+use App\Jobs\RecordLastLoginAt;
 use Illuminate\Support\Facades\Auth;
 
 class AuthorizationsController extends Controller
@@ -18,6 +19,8 @@ class AuthorizationsController extends Controller
         }
 
         $request->user()->token = 'Bearer ' . $token;
+
+        dispatch(new RecordLastLoginAt($request->user()));
 
         return $this->res(Code::Success, $request->user(), '登陆成功');
     }
