@@ -22,8 +22,6 @@ Delighture Github地址：https://github.com/1357280829/delighture
 2. 在 `config/app.php` 文件中更新配置 `'timezone' => 'Asia/Shanghai'`
 3. 新建中间件 `AcceptHeader` ,为请求自动添加请求头 `Accept:application/json` ，并在 `Kernel` 文件中将其加入，中间件和  `Kernel` 的文件内容如下：
 
-<br/>
-
 *app/Http/Middleware/AcceptHeader.php*
 ```
 <?php
@@ -50,8 +48,6 @@ class AcceptHeader
 }
 
 ```
-
-<br/>
 
 *app/Http/Kernel.php*
 ```
@@ -84,8 +80,6 @@ class AcceptHeader
 1. 首先我们使用 `Laravel-Enum` 扩展包来构建我们的自定义状态码枚举类，安装命令： `composer require bensampo/laravel-enum`
 2. 创建自定义状态码文件：`php artisan make:enum Code`
 3. 自定义状态码文件内容如下，里边已经定义好了一些后面会用到的状态码，直接复制就好，后面可以再去研究状态码的意义
-
-<br/>
 
 *app/Enums/Code.php*
 ```
@@ -146,8 +140,6 @@ final class Code extends Enum
 
 1. 在Laravel自带的控制器基类里加入方法 `res()` 作为我们的控制器响应，文件内容如下：
 
-<br/>
-
 *app/Http/Controllers/Controller.php*
 ```
 <?php
@@ -167,7 +159,7 @@ class Controller extends BaseController
     protected function res($code = Code::Success, $data = [], $message = '')
     {
         return response()->json([
-            'message' => $message ?: (Code::getDescription($code) ?? '未知错误'),
+            'message' => $message ?: Code::getDescription($code),
             'custom_code' => $code,
             'data' => $data,
         ]);
@@ -176,8 +168,6 @@ class Controller extends BaseController
 ```
 
 2. 新建一个自定义的异常响应，命令 `php artisan make:exception CustomException` ，其文件内容如下：
-
-<br/>
 
 *app/Exceptions/CustomException.php*
 ```
@@ -205,15 +195,61 @@ class CustomException extends Exception
 }
 ```
 
-3. （后面补充）
+3. 重写通用异常和表单验证异常，在 `App\Exception\Handler` 文件的末尾加入两个重写方法：
+
+*app/Exceptions/Handler.php*
+```
+	·
+	·
+	·
+	/**
+     * 重写：验证异常时抛出JSON响应
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param ValidationException $exception
+     * @return \Illuminate\Http\JsonResponse
+     */
+    protected function invalidJson($request, ValidationException $exception)
+    {
+        return response()->json([
+            'message' => Code::getDescription(Code::FailedValidate),
+            'custom_code' => Code::FailedValidate,
+            'errors' => $exception->errors(),
+        ], $exception->status);
+    }
+
+    /**
+     * 重写：通用异常时抛出JSON响应格式
+     *
+     * @param Throwable $e
+     * @return array
+     */
+    protected function convertExceptionToArray(Throwable $e)
+    {
+        return config('app.debug') ? [
+            'message' => $e->getMessage(),
+			//  加入下面这行
+            'custom_code' => $e->getCode(),
+            'exception' => get_class($e),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => collect($e->getTrace())->map(function ($trace) {
+                return Arr::except($trace, ['args']);
+            })->all(),
+        ] : [
+            'message' => $this->isHttpException($e) ? $e->getMessage() : 'Server Error',
+			//  加入下面这行
+            'custom_code' => $e->getCode(),
+        ];
+    }
+}
+```
 
 ## 4 构建用户模型 和 实现基于JWT的授权认证
 
 ### 4.1 构建用户模型
 
 1. 设计用户表，并创建用户迁移文件，最重要的是 `account` 和 `password` 两个字段，另外注意加入软删除，创建命令 `php artisan make:migration create_users_table` ，文件内容如下：
-
-<br/>
 
 *database/migrations/xxxxx_create_users_table.php*
 ```
@@ -235,12 +271,10 @@ class CreateUsersTable extends Migration
             $table->string('phone')->nullable()->comment('手机号');
             $table->string('email')->nullable()->comment('邮箱');
             $table->timestamps();
-
-            //  软删除
             $table->softDeletes();
         });
     }
-    
+
     public function down()
     {
         Schema::dropIfExists('users');
@@ -249,8 +283,6 @@ class CreateUsersTable extends Migration
 ```
 
 2. 创建用户模型，命令 `php artisan make:model Models/User`
-
-<br/>
 
 *app/Models/User.php*
 ```
@@ -275,8 +307,6 @@ class User extends Authenticatable
 
 3. 在 `config/auth.php` 文件中修改授权用户配置：
 
-<br/>
-
 *config/auth.php*
 ```
 	·
@@ -298,8 +328,6 @@ class User extends Authenticatable
 1. 安装扩展包 `composer require tymon/jwt-auth`
 2. 发布配置文件 `config/jwt.php`，命令 `php artisan vendor:publish --provider="Tymon\JWTAuth\Providers\LaravelServiceProvider"`
 3. 修改授权用户模型，文件内容修改如下：
-
-<br/>
 
 *app/Models/User.php*
 ```
@@ -335,8 +363,6 @@ class User extends Authenticatable implements JWTSubject
 
 4. 修改授权配置文件 `config/auth.php` 守卫（Guard）的配置：
 
-<br/>
-
 *config/auth.php*
 ```
 	·
@@ -369,8 +395,6 @@ class User extends Authenticatable implements JWTSubject
 ```
 
 5. 实现无痛刷新JWT授权认证的功能，新建中间件 `RefreshToken` ，命令 `php artisan make:middleware RefreshToken` ，其文件内容如下：
-
-<br/>
 
 *app/Http/Middleware/RefreshToken.php*
 ```
@@ -439,8 +463,6 @@ class RefreshToken extends JWTBaseMiddleware
 
 6. 接着正式使用JWT于用户登陆注销功能中，创建控制器 `Api/AuthorizationsController` ，命令 `php artisan make:controller Api/AuthorizationsController`；创建表单验证 `Api/AuthorizationRequest` 及其基类 `Request` ，命令分别为 `php artisan make:request Api/AuthorizationRequest` 和 `php artisan make:request Request` ，三个文件的内容如下：
 
-<br/>
-
 *app/Http/Controllers/Api/AuthorizationsController.php*
 ```
 <?php
@@ -476,8 +498,6 @@ class AuthorizationsController extends Controller
 }
 ```
 
-<br/>
-
 *app/Http/Requests/Api/AuthorizationRequest.php*
 ```
 <?php
@@ -494,14 +514,12 @@ class AuthorizationRequest extends Request
             case 'POST':
                 return [
                     'account' => 'required|between:6,12|exists:users,account',
-                    'password' => 'required|confirmed',
+                    'password' => 'required',
                 ];
         }
     }
 }
 ```
-
-<br/>
 
 *app/Http/Requests/Request.php*
 ```
@@ -521,8 +539,6 @@ class Request extends FormRequest
 ```
 
 7. 在 `routes/api.php` 创建相关路由
-
-<br/>
 
 *routes/api.php*
 ```
@@ -554,8 +570,6 @@ Route::namespace('Api')->group(function () {
 ```
 
 8. 适当的提取 `config/jwt.php` 文件中的相关配置到 `.env` 文件中，如：
-
-<br/>
 
 *.env*
 ```
