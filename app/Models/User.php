@@ -17,6 +17,12 @@ class User extends Authenticatable implements JWTSubject
         'account', 'password', 'nickname', 'phone', 'email'
     ];
 
+    protected $casts = [
+        'created_at' => 'datetime:Y-m-d H:i:s',
+        'updated_at' => 'datetime:Y-m-d H:i:s',
+        'last_login_at' => 'datetime:Y-m-d H:i:s',
+    ];
+
     public function setPasswordAttribute($value)
     {
         // 如果值的长度等于 60，即认为是已经做过加密的情况
