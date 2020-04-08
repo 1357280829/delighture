@@ -21,7 +21,7 @@ use Illuminate\Support\Str;
 $factory->define(User::class, function (Faker $faker) {
     return [
         'account' => Str::random(10),
-        'nickname' => $faker->name,
+        'nickname' => $faker->unique()->name,
         'phone' => $faker->unique()->numberBetween(10000000000, 20000000000),
         'email' => $faker->unique()->safeEmail,
         'last_login_at' => $faker->dateTimeBetween('-2 years', '-1 years'),
