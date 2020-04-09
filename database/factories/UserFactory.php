@@ -22,8 +22,9 @@ $factory->define(User::class, function (Faker $faker) {
     return [
         'account' => Str::random(10),
         'nickname' => $faker->unique()->name,
-        'phone' => $faker->unique()->numberBetween(10000000000, 20000000000),
-        'email' => $faker->unique()->safeEmail,
+        'phone' => $faker->unique()->phoneNumber,
+        'email' => $faker->unique()->email,
+        'description' => $faker->realText(),
         'last_login_at' => $faker->dateTimeBetween('-2 years', '-1 years'),
     ];
 });
