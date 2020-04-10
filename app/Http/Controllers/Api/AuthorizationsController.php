@@ -20,6 +20,7 @@ class AuthorizationsController extends Controller
 
         $request->user()->token = 'Bearer ' . $token;
 
+        //  异步记录用户登陆时间
         dispatch(new RecordLastLoginAt($request->user()));
 
         return $this->res(Code::Success, $request->user(), '登陆成功');

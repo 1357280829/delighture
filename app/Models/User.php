@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Arr;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
@@ -43,5 +43,18 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
+    }
+
+    public function toESArray()
+    {
+        // 只取出需要的字段
+        return Arr::only($this->toArray(), [
+            'id',
+            'account',
+            'nickname',
+            'phone',
+            'email',
+            'description',
+        ]);
     }
 }
