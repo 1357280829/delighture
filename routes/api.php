@@ -16,7 +16,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::namespace('Api')->group(function () {
 
-    Route::post('users', 'UsersController@store');
+    Route::get('es/demo1', 'ESExampleController@demo1');
+    Route::get('es/demo2', 'ESExampleController@demo2');
+    Route::get('es/demo3', 'ESExampleController@demo3');
+    Route::get('es/demo4', 'ESExampleController@demo4');
+    Route::get('es/demo5', 'ESExampleController@demo5');
+    Route::get('es/demo6', 'ESExampleController@demo6');
 
     Route::post('authorizations', 'AuthorizationsController@store');
 
@@ -24,6 +29,6 @@ Route::namespace('Api')->group(function () {
         Route::delete('authorizations', 'AuthorizationsController@destroy');
 
         Route::get('users', 'UsersController@index');
-//        Route::post('users', 'UsersController@store');
+        Route::post('users', 'UsersController@store');
     });
 });

@@ -24,8 +24,8 @@ class UsersController extends Controller
             'account' => 'required|between:6,12|unique:users,account',
             'password' => 'required|confirmed',
             'nickname' => 'required',
-            'phone' => '',
-            'email' => '',
+            'phone' => 'unique:users',
+            'email' => 'email',
         ]);
 
         $user = User::create($validatedData);
